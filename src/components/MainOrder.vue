@@ -1,0 +1,221 @@
+<template >
+  <div class="">
+    <md-tabs class="md-primary" md-alignment="fixed" md-sync-route md-active-tab="tab-pizza">
+      <md-tab class="fb-menu-tab" id="tab-pizza" md-label="조리스케쥴" to="/mainTab/schdule" exact>
+        <h1>11</h1>
+      </md-tab>
+
+      <md-tab class="fb-menu-tab" id="tab-a" md-label="조리 완료" to="/mainTab/menu" exact>
+        <div class="md-layout md-alignment-center-center fb-menuHistory-container">
+          <div class="md-layout-item md-size-90 fb-menuHistory-box"  v-for="menu in MENU" >
+            <md-card>
+              <md-card-content class="md-layout md-alignment-center-center">
+              <span class="md-layout-item md-size-10">{{menu.orderIndex}}번</span>
+              <span class="md-layout-item md-size-40" style="font-weight: 900;">{{menu.full}}</span>
+              <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">{{menu.makingTime.total}}분</span>
+              <!-- <span class="md-layout-item md-size-20">시작</span> -->
+              <div class="md-layout-item md-size-20">
+                <md-button class=" md-raised md-default" :class="{'md-accent': menu.state==1}" @click="makeStart(menu.orderCode, menu.orderIndex)">
+                  시작
+                </md-button>
+              </div>
+              <div class="md-layout-item md-size-20">
+                <md-button class=" md-raised md-default" @click="makeComplete(menu.orderCode, menu.orderIndex)">
+                  완료
+                </md-button>
+              </div>
+
+
+              </md-card-content>
+            </md-card>
+          </div>
+        </div>
+
+        <div class="md-layout md-alignment-left-center ">
+          <md-toolbar class="md-primary">
+            <h3 class="md-layout-item md-size-100 md-title">순차적 주문 리스트</h3>
+          </md-toolbar>
+          <div class="md-layout-item md-size-25" v-for="menu in ORDER_MENU" >
+            <md-card class="fb-list-card-box" style="margin: 4px 4px; ">
+              <md-card-content class="fb-list-card" style="">
+              <!-- <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">15분</span> -->
+              <p>{{menu.index}}번</p>
+              <p>{{menu.name}}</p>
+              <p>{{menu.price}}원</p>
+              <!-- <span class="md-layout-item md-size-20">시작</span> -->
+
+
+              </md-card-content>
+            </md-card>
+          </div>
+
+        </div>
+
+      </md-tab>
+    </md-tabs>
+  </div>
+
+</template>
+
+<script>
+import axios from 'axios'
+import moment from 'vue-moment'
+
+export default {
+  name: 'order-history',
+  data() {
+    return {
+        stdId: 2130,
+        MENU: [],
+        MENUALL: [],
+        ORDER_MENU: [],
+        menuList: [],
+        // orderTime: []
+        orderTime: 123,
+        isH: true,
+        timer: '',
+        lastIndex: 0
+    }
+  },
+  methods: {
+    getOrdered: function() {
+
+      axios
+      .get('https://ow696its6d.execute-api.ap-northeast-2.amazonaws.com/v1?id='+this.stdId)
+      .then((response) =>  {
+        console.log(response);
+        this.num = response.data.Count;
+        if(this.num != 0) {
+          this.orderTime = response.data.Items[0].startTime;
+
+          response.data.Items.sort(function(a,b) {
+          //   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+              return a.orderIndex < b.orderIndex ? -1 : a.orderIndex > b.orderIndex ? 1 : 0;
+          });
+
+          if(this.lastIndex != response.data.Items[response.data.Count-1].orderIndex) {
+            this.updateUI(response.data.Items);
+          }
+
+          this.lastIndex = response.data.Items[response.data.Count-1].orderIndex;
+        }
+
+        //
+
+
+      })
+    },
+    updateUI: function(data) {
+      this.ORDER_MENU = new Array();
+      this.MENU = new Array();
+      var showCnt = 0;
+      var prevNum = 0;
+
+      var itemParams = new Object();
+      itemParams.name = "";
+      itemParams.index = 0;
+      itemParams.price = 0;
+
+      for(var i=0 ; i<this.num ; i++) {
+        this.MENUALL.push(data[i]);
+        if(i==0) {
+          prevNum = data[0].orderIndex;
+        }
+        if(showCnt < 3) {
+          if(data[i].makedFood == 0) {
+            this.MENU.push(data[i]);
+            showCnt++;
+          }
+        }
+
+
+        this.ORDER_MENU.push()
+
+        if(prevNum == data[i].orderIndex) {
+          itemParams.name = itemParams.name  + data[i].full +  " #  ";
+          itemParams.index = data[i].orderIndex;
+          itemParams.price += data[i].price;
+        }
+        else{
+            this.ORDER_MENU.push(itemParams);
+            itemParams = new Object();
+            itemParams.name = data[i].full +  " #  ";
+            itemParams.index = data[i].orderIndex;
+            itemParams.price = data[i].price;
+        }
+
+        prevNum = data[i].orderIndex;
+      }
+
+      if(this.num > 0) {
+        this.ORDER_MENU.push(itemParams);
+      }
+
+      console.log(this.ORDER_MENU);
+      console.log(data);
+
+    },
+    makeStart: function(code, idx) {
+      console.log(code, idx);
+
+
+      axios
+      .post('https://ow696its6d.execute-api.ap-northeast-2.amazonaws.com/v1',
+          {
+            "orderCode": code,
+            "orderIndex": idx,
+            "state": 1
+          }
+      )
+      .then((resp) => {
+        console.log(resp);
+
+
+      })
+    },
+    makeComplete: function(code, idx) {
+      axios
+      .post('https://ow696its6d.execute-api.ap-northeast-2.amazonaws.com/v1',
+          {
+            "orderCode": code,
+            "orderIndex": idx,
+            "state": 2
+          }
+      )
+      .then((resp) => {
+        console.log(resp);
+
+
+      })
+    }
+
+  },
+  created: function() {
+    this.getOrdered();
+    this.timer = setInterval(this.getOrdered, 200000);
+  }
+
+
+}
+</script>
+
+<style lang="css" scoped>
+
+.fb-menuHistory-box {
+  margin: 10px 0px;
+}
+
+.fb-menuHistory-container {
+  margin-bottom: 20px;
+}
+
+.fb-list-card {
+  padding-bottom: 8px !important;
+  min-height: 80px;
+
+}
+
+.fb-list-card-box {
+  height: 100%;
+}
+</style>
