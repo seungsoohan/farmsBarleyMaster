@@ -135,7 +135,7 @@ export default {
       itemParams.name = "";
       itemParams.index = 0;
       itemParams.price = 0;
-      itemParams.orderCode = 0;
+      itemParams.orderCode = new Array();
 
       for(var i=0 ; i<this.num ; i++) {
         this.MENUALL.push(data[i]);
@@ -150,12 +150,12 @@ export default {
         }
 
 
-        this.ORDER_MENU.push()
+        // this.ORDER_MENU.push()
 
         if(prevNum == data[i].orderIndex) {
           itemParams.name = itemParams.name  + data[i].full +  " #  ";
           itemParams.index = data[i].orderIndex;
-          itemParams.orderCode = data[i].orderCode;
+          itemParams.orderCode.push(data[i].orderCode);
           itemParams.price += data[i].price;
         }
         else{
@@ -163,7 +163,7 @@ export default {
             itemParams = new Object();
             itemParams.name = data[i].full +  " #  ";
             itemParams.index = data[i].orderIndex;
-            itemParams.orderCode = data[i].orderCode;
+            itemParams.orderCode = [data[i].orderCode];
             itemParams.price = data[i].price;
         }
 
@@ -232,22 +232,28 @@ export default {
       console.log("z");
     },
     takeComplete: function(data) {
-      // console.log(data.orderCode);
+      console.log(data);
       // console.log(data.orderCode.slice(0,data.orderCode.length-3));
-      
-      // axios
-      // .post('https://ow696its6d.execute-api.ap-northeast-2.amazonaws.com/v1',
-      //     {
-      //       "orderCode": data.orderCode.slice(0,data.orderCode.length-3),
-      //       "orderIndex": data.index,
-      //       "state": 3
-      //     }
-      // )
-      // .then((resp) => {
-      //   console.log(resp);
-      //
-      //
-      // })
+
+      for(var i=0 ; i<data.orderCode.length ; i++) {
+        axios
+        .post('https://ow696its6d.execute-api.ap-northeast-2.amazonaws.com/v1',
+            {
+              "orderCode": data.orderCode[i],
+              "orderIndex": data.index,
+              "state": 3
+            }
+        )
+        .then((resp) => {
+          console.log(resp);
+
+
+        })
+      }
+
+      var idx = this.ORDER_MENU.findIndex(x=> x.orderIndex === data.orderIndex);
+      this.ORDER_MENU.splice(idx,1);
+
     }
 
   },
