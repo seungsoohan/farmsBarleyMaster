@@ -33,7 +33,8 @@
               <md-card-content class="md-layout md-alignment-center-center">
               <span class="md-layout-item md-size-10">{{menu.orderIndex}}번</span>
               <span class="md-layout-item md-size-40" style="font-weight: 900;">{{menu.full}}</span>
-              <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">{{menu.makingTime.total}}분</span>
+              <!-- <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">{{menu.makingTime.total}}분</span> -->
+              <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">{{menu.quantity}}판</span>
               <!-- <span class="md-layout-item md-size-20">시작</span> -->
               <div class="md-layout-item md-size-20">
                 <md-button class=" md-raised md-default" :class="{'md-accent': menu.state==1}" @click="makeStart(menu.orderCode, menu.orderIndex); menu.state=1">
@@ -52,6 +53,8 @@
             </md-card>
           </div>
         </div>
+
+        
 
 
 
