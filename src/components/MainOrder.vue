@@ -7,7 +7,7 @@
             <h3 class="md-layout-item md-size-100 md-title">순차적 주문 리스트</h3>
           </md-toolbar>
           <div class="md-layout-item md-size-25" v-for="menu in ORDER_MENU" >
-            <md-card class="fb-list-card-box" style="margin: 4px 4px; ">
+            <md-card class="fb-list-card-box" style="margin: 4px 4px; " >
               <md-card-content class="fb-list-card" style="">
               <!-- <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">15분</span> -->
               <p>{{menu.index}}번</p>
@@ -37,13 +37,13 @@
               <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">{{menu.quantity}}판</span>
               <!-- <span class="md-layout-item md-size-20">시작</span> -->
               <div class="md-layout-item md-size-20">
-                <md-button class=" md-raised md-default" :class="{'md-accent': menu.state==1}" @click="makeStart(menu.orderCode, menu.orderIndex); menu.state=1">
+                <md-button class=" md-raised md-default" :disabled="menu.state>0" :class="{'md-accent': menu.state==0}" @click="makeStart(menu.orderCode, menu.orderIndex); menu.state=1">
                   시작
                 </md-button>
               </div>
               <div class="md-layout-item md-size-20">
                 <!-- <md-button class=" md-raised md-default" @click="makeComplete(menu.orderCode, menu.orderIndex)"> -->
-                <md-button class=" md-raised md-default" @click="checkComplete(menu.orderCode, menu.orderIndex)">
+                <md-button class=" md-raised md-default " :disabled="menu.state==0" :class="{'md-primary': menu.state==1}" @click="checkComplete(menu.orderCode, menu.orderIndex)">
                   완료
                 </md-button>
               </div>
@@ -54,7 +54,7 @@
           </div>
         </div>
 
-        
+
 
 
 
@@ -66,6 +66,8 @@
           md-cancel-text="취소"
           @md-cancel="onCancel"
           @md-confirm="onConfirm" />
+
+
 
         <!-- <md-button class="md-primary md-raised" @click="modalActive = true">Confirm</md-button>
         <span v-if="value">Value: {{ value }}</span> -->
@@ -225,12 +227,16 @@ export default {
       console.log(this.MENU);
       var idx = this.MENU.findIndex(x=> x.orderIndex === this.postIdx);
       this.MENU.splice(idx,1);
+
+      // var idx2 = this.ORDER_MENU.findIndex(x=> x.index === this.postIdx);
+      // this.ORDER_MENU[idx2].complete = true;
       // console.log(test);
       // this.MENU = [];
     },
     onCancel () {
       this.value = 'Disagreed'
     },
+
     test: function() {
       console.log("z");
     },
@@ -262,8 +268,8 @@ export default {
   },
   created: function() {
     this.getOrdered();
-    // this.timer = setInterval(this.getOrdered, 60000);
-    this.timer = setInterval(this.test, 60000);
+    this.timer = setInterval(this.getOrdered, 20000);
+    // this.timer = setInterval(this.test, 60000);
   }
 
 
