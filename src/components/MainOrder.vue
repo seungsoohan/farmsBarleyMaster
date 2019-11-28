@@ -115,14 +115,18 @@ export default {
 
           response.data.Items.sort(function(a,b) {
           //   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-              return a.orderIndex < b.orderIndex ? -1 : a.orderIndex > b.orderIndex ? 1 : 0;
+              // return a.orderIndex < b.orderIndex ? -1 : a.orderIndex > b.orderIndex ? 1 : 0;
+              return a.orderIndex > b.orderIndex ? -1 : a.orderIndex < b.orderIndex ? 1 : 0;
           });
 
-          if(this.lastIndex != response.data.Items[response.data.Count-1].orderIndex) {
+          if(this.lastIndex != response.data.Items[0].orderIndex) {
             this.updateUI(response.data.Items);
           }
+          else {
+            console.log("same!", this.lastIndex, response.data.Items[0].orderIndex);
+          }
 
-          this.lastIndex = response.data.Items[response.data.Count-1].orderIndex;
+          this.lastIndex = response.data.Items[0].orderIndex;
         }
 
         //
@@ -148,7 +152,7 @@ export default {
           prevNum = data[0].orderIndex;
         }
         if(showCnt < 10) {
-          if(data[i].makedFood == 0) {
+          if(data[i].makedFood == 0 || data[i].menuId.slice(0,1) == 'c' || data[i].menuId.slice(0,2) == 'pj') {
             this.MENU.push(data[i]);
             showCnt++;
           }
