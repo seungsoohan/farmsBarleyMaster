@@ -3,17 +3,15 @@
     <md-tabs class="md-primary" md-alignment="fixed" md-sync-route md-active-tab="tab-pizza">
       <md-tab class="fb-menu-tab" id="tab-pizza" md-label="주문 리스트" to="/mainTab/schdule" exact>
         <div class="md-layout md-alignment-left-center ">
-          <md-toolbar class="md-primary">
+          <!-- <md-toolbar class="md-primary">
             <h3 class="md-layout-item md-size-100 md-title">순차적 주문 리스트</h3>
           </md-toolbar>
           <div class="md-layout-item md-size-25" v-for="menu in ORDER_MENU" >
             <md-card class="fb-list-card-box" style="margin: 4px 4px; " >
               <md-card-content class="fb-list-card" style="">
-              <!-- <span class="md-layout-item md-size-10" style="font-weight: 900; font-size:18px;">15분</span> -->
               <p>{{menu.index}}번</p>
               <p>{{menu.name}}</p>
               <p>{{menu.price}}원</p>
-              <!-- <span class="md-layout-item md-size-20">시작</span> -->
 
               <md-button class=" md-raised md-default md-accent" @click="takeComplete(menu)">
                 수령완료
@@ -21,7 +19,7 @@
 
               </md-card-content>
             </md-card>
-          </div>
+          </div> -->
 
         </div>
       </md-tab>
@@ -52,6 +50,26 @@
               </md-card-content>
             </md-card>
           </div>
+
+          <md-toolbar class="md-primary">
+            <h3 class="md-layout-item md-size-100 md-title">순차적 주문 리스트</h3>
+          </md-toolbar>
+          <div class="md-layout-item md-size-25" v-for="menu in ORDER_MENU" >
+            <md-card class="fb-list-card-box" style="margin: 4px 4px; " >
+              <md-card-content class="fb-list-card" style="">
+              <p>{{menu.index}}번</p>
+              <p>{{menu.name}}</p>
+              <p>{{menu.price}}원</p>
+              <p>{{menu.phoneNum}}</p>
+
+              <md-button class=" md-raised md-default md-accent" @click="takeComplete(menu)">
+                수령완료
+              </md-button>
+
+              </md-card-content>
+            </md-card>
+          </div>
+
         </div>
 
 
@@ -115,18 +133,29 @@ export default {
 
           response.data.Items.sort(function(a,b) {
           //   return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-              // return a.orderIndex < b.orderIndex ? -1 : a.orderIndex > b.orderIndex ? 1 : 0;
-              return a.orderIndex > b.orderIndex ? -1 : a.orderIndex < b.orderIndex ? 1 : 0;
+              return a.orderIndex < b.orderIndex ? -1 : a.orderIndex > b.orderIndex ? 1 : 0;
+              // return a.orderIndex > b.orderIndex ? -1 : a.orderIndex < b.orderIndex ? 1 : 0;
           });
 
-          if(this.lastIndex != response.data.Items[0].orderIndex) {
+          for(var i=0 ; i< response.data.Count ; i++) {
+            if(response.data.Items[i].menuId.slice(0,2) == "pc") {
+              console.log("cica");
+              console.log(response.data.Items);
+              var temp = response.data.Items[i];
+              response.data.Items.unshift(temp);
+              response.data.Items.splice(i+1,1);
+              console.log(response.data.Items);
+            }
+          }
+
+          if(this.lastIndex != response.data.Items[response.data.Count-1].orderIndex) {
             this.updateUI(response.data.Items);
           }
           else {
-            console.log("same!", this.lastIndex, response.data.Items[0].orderIndex);
+            console.log("same!", this.lastIndex, response.data.Items[response.data.Count-1].orderIndex);
           }
 
-          this.lastIndex = response.data.Items[0].orderIndex;
+          this.lastIndex = response.data.Items[response.data.Count-1].orderIndex;
         }
 
         //
@@ -164,6 +193,7 @@ export default {
         if(prevNum == data[i].orderIndex) {
           itemParams.name = itemParams.name  + data[i].full +  " #  ";
           itemParams.index = data[i].orderIndex;
+          itemParams.phoneNum = data[i].phoneNum;
           itemParams.orderCode.push(data[i].orderCode);
           itemParams.price += data[i].price;
         }
@@ -172,6 +202,7 @@ export default {
             itemParams = new Object();
             itemParams.name = data[i].full +  " #  ";
             itemParams.index = data[i].orderIndex;
+            itemParams.phoneNum = data[i].phoneNum;
             itemParams.orderCode = [data[i].orderCode];
             itemParams.price = data[i].price;
         }
@@ -264,15 +295,18 @@ export default {
         })
       }
 
-      var idx = this.ORDER_MENU.findIndex(x=> x.orderIndex === data.orderIndex);
+      var idx = this.ORDER_MENU.findIndex(x=> x.index === data.index);
       this.ORDER_MENU.splice(idx,1);
+
+      // console.log(this.ORDER_MENU);
+      // console.log(idx);
 
     }
 
   },
   created: function() {
     this.getOrdered();
-    this.timer = setInterval(this.getOrdered, 20000);
+    // this.timer = setInterval(this.getOrdered, 20000);
     // this.timer = setInterval(this.test, 60000);
   }
 
