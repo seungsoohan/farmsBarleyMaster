@@ -137,16 +137,16 @@ export default {
               // return a.orderIndex > b.orderIndex ? -1 : a.orderIndex < b.orderIndex ? 1 : 0;
           });
 
-          for(var i=0 ; i< response.data.Count ; i++) {
-            if(response.data.Items[i].menuId.slice(0,2) == "pc") {
-              console.log("cica");
-              console.log(response.data.Items);
-              var temp = response.data.Items[i];
-              response.data.Items.unshift(temp);
-              response.data.Items.splice(i+1,1);
-              console.log(response.data.Items);
-            }
-          }
+          // for(var i=0 ; i< response.data.Count ; i++) {
+          //   if(response.data.Items[i].menuId.slice(0,2) == "pc") {
+          //     console.log("cica");
+          //     console.log(response.data.Items);
+          //     var temp = response.data.Items[i];
+          //     response.data.Items.unshift(temp);
+          //     response.data.Items.splice(i+1,1);
+          //     console.log(response.data.Items);
+          //   }
+          // }
 
           if(this.lastIndex != response.data.Items[response.data.Count-1].orderIndex) {
             this.updateUI(response.data.Items);
@@ -169,6 +169,8 @@ export default {
       var showCnt = 0;
       var prevNum = 0;
 
+      var tempSauceName = null; // for test 위험
+
       var itemParams = new Object();
       itemParams.name = "";
       itemParams.index = 0;
@@ -180,12 +182,45 @@ export default {
         if(i==0) {
           prevNum = data[0].orderIndex;
         }
-        if(showCnt < 10) {
-          if(data[i].makedFood == 0 || data[i].menuId.slice(0,1) == 'c' || data[i].menuId.slice(0,2) == 'pj') {
+        if(showCnt < 999) {
+          // if(data[i].makedFood == 0 || data[i].menuId.slice(0,1) == 'c' || data[i].menuId.slice(0,2) == 'pj' || data[i].menuId.slice(0,2) == 'ss') {
+          if((data[i].makedFood == 0 || data[i].menuId.slice(0,1) == 'c' || data[i].menuId.slice(0,2) == 'pj') && data[i].menuId.slice(0,2) != 'c2') {
             this.MENU.push(data[i]);
             showCnt++;
           }
+
+          if(data[i].menuId.slice(0,2) == 'c2') {
+            if(tempSauceName != null) {
+              console.log(this.MENU[i], i, tempSauceName);
+              data[i].full = data[i].full + tempSauceName;
+              tempSauceName = null;
+
+              this.MENU.push(data[i]);
+            }
+            else {
+              this.MENU.push(data[i]);
+            }
+          }
+          console.log(i, data[i].menuId);
         }
+
+
+
+        if(data[i].menuId.slice(0,2) == 'ss') {
+          var found = false;
+          for(var j=0 ; j<this.MENU.length ; j++) {
+            if(data[i].orderIndex == this.MENU[j].orderIndex) {
+              this.MENU[j].full = this.MENU[j].full + data[i].full;
+              found = true;
+              tempSauceName = null;
+            }
+          }
+          if(!found) {
+            tempSauceName = data[i].full;
+          }
+        }
+
+
 
 
         // this.ORDER_MENU.push()
@@ -306,7 +341,7 @@ export default {
   },
   created: function() {
     this.getOrdered();
-    // this.timer = setInterval(this.getOrdered, 20000);
+    this.timer = setInterval(this.getOrdered, 20000);
     // this.timer = setInterval(this.test, 60000);
   }
 
