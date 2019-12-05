@@ -26,6 +26,7 @@
 
       <md-tab class="fb-menu-tab" id="tab-a" md-label="조리 완료" to="/mainTab/menu" exact>
         <div class="md-layout md-alignment-center-center fb-menuHistory-container">
+          <!-- <button type="button" name="button" @click="ringPlay()">aa</button> -->
           <div class="md-layout-item md-size-90 fb-menuHistory-box"  v-for="menu in MENU" >
             <md-card v-if="menu.state < 2">
               <md-card-content class="md-layout md-alignment-center-center">
@@ -163,6 +164,10 @@ export default {
 
       })
     },
+    ringPlay: function() {
+      var audio = new Audio(require("../assets/ring.wav"));
+        audio.play();
+    },
     updateUI: function(data) {
       this.ORDER_MENU = new Array();
       this.MENU = new Array();
@@ -252,6 +257,7 @@ export default {
       console.log(this.ORDER_MENU);
       console.log(data);
 
+      this.ringPlay();
     },
     makeStart: function(code, idx) {
       console.log(code, idx);
